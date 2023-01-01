@@ -15,18 +15,20 @@ const App = () => {
   const [confirmpassword, setConfirmPassword] = useState('')
 
 
-
-
   const createUser = (e) => {
     e.preventDefault();
-    axios.post(`${baseUrl}/user`,
-      { firstName, lastName, age, email, gender, phone, password, confirmpassword })
-      .then((response) => {
-        console.log("Response Sent ", response);
-      })
-      .catch(error => {
-        console.log('Error occured', error)
-      })
+    if (password === confirmpassword) {
+      axios.post(`${baseUrl}/signup`, { firstName, lastName, age, email, gender, phone, password, confirmpassword })
+        .then(response => {
+          console.log("User Added Succesfully 👍");
+        })
+        .catch(error => {
+          console.log('Error occured while adding product ❌', error)
+        })
+    }
+    else {
+      console.log("Passwords didn't Match")
+    }
   }
 
 

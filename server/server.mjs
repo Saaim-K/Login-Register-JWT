@@ -6,7 +6,7 @@ import mongoose from 'mongoose'
 
 const app = express()
 const port = process.env.PORT || 5426
-const mongodbURI = process.env.mongodbURI || "mongodb+srv://login-signup:login-signup@cluster0.pu4fwyo.mongodb.net/Login-Singnup?retryWrites=true&w=majority"
+const mongodbURI = process.env.mongodbURI || "mongodb+srv://login-signup:login-signup@cluster0.pu4fwyo.mongodb.net/Login-SignUp?retryWrites=true&w=majority"
 
 
 app.use(cors())
@@ -18,7 +18,7 @@ let userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     age: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, trim: true, lowercase: true, unique: true },
     gender: { type: String, required: true },
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -30,32 +30,42 @@ const userModel = mongoose.model('Users', userSchema);
 
 
 // ----------------------------------- Create User -----------------------------------
-app.post('/user', async (req, res) => {
+app.post('/signup', async (req, res) => {
     try {
         const password = req.body.password
         const confirmpassword = req.body.confirmpassword
-        if (password === confirmpassword) {
-            userModel.create(
-                {
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    age: req.body.age,
-                    email: req.body.email,
-                    gender: req.body.gender,
-                    phone: req.body.phone,
-                    password: req.body.password,
-                    confirmpassword: req.body.confirmpassword,
+        const email = req.body.email.toLowerCase();
+        userModel.findOne({ email: email }, (error, user) => {
+            if (!error) {
+                if (user) {
+                    console.log("User already exist: ", user);
+                    res.status(409).send({
+                        message: "User already exists. Please try a different email"
+                    });
+                    return;
+                } else {
+                    if (password === confirmpassword) {
+                        userModel.create({
+                            firstName: req.body.firstName,
+                            lastName: req.body.lastName,
+                            age: req.body.age,
+                            email: req.body.email,
+                            gender: req.body.gender,
+                            phone: req.body.phone,
+                            password: req.body.password,
+                            confirmpassword: req.body.confirmpassword,
+                        })
+                        res.status(201).send(
+                            `user created`
+                        )
+                    } else {
+                        res.send("Passwords didn't Match")
+                    }
                 }
-            )
-            res.status(201).send(
-                `user created`
-            )
-            console.log(response.data)
-        } else {
-            res.send("Passwords didn't Match")
-        }
+            }
+        })
     } catch (error) {
-        res.status(400).send(error)
+        res.status(500).send(error)
     }
 })
 // ----------------------------------- Create User -----------------------------------
