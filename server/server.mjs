@@ -2,16 +2,25 @@ import express from 'express'
 import path from 'path'
 import cors from 'cors'
 import mongoose from 'mongoose'
+import bcrypt from 'bcryptjs'
+import jwt from "jsonwebtoken"
+import cookieParser from 'cookie-parser';
 
 
 const app = express()
 const port = process.env.PORT || 5426
 const mongodbURI = process.env.mongodbURI || "mongodb+srv://login-signup:login-signup@cluster0.pu4fwyo.mongodb.net/Login-SignUp?retryWrites=true&w=majority"
+const SECRET = process.env.SECRET || "Thesharedsecretmustbeatleast32bytesinlength";
 
 
-app.use(cors())
-app.use(express.json());
+app.use(express.json())
+app.use(cookieParser())
 mongoose.connect(mongodbURI)
+app.use(cors({
+    origin: ['http://localhost:3000', "*"],
+    credentials: true
+}));
+
 
 // ----------------------------------- MongoDB -----------------------------------
 let userSchema = new mongoose.Schema({
@@ -20,22 +29,20 @@ let userSchema = new mongoose.Schema({
     age: { type: String, required: true },
     email: { type: String, trim: true, lowercase: true, unique: true },
     gender: { type: String, required: true },
-    phone: { type: String, required: true, unique: true },
+    phone: { type: String, required: true },
     password: { type: String, required: true },
-    confirmpassword: { type: String, required: true },
     createdOn: { type: Date, default: Date.now }
 })
 const userModel = mongoose.model('Users', userSchema);
 // ----------------------------------- MongoDB -----------------------------------
 
 
-// ----------------------------------- Create User -----------------------------------
+// ----------------------------------- SignUp -----------------------------------
 app.post('/signup', async (req, res) => {
     try {
-        const password = req.body.password
-        const confirmpassword = req.body.confirmpassword
         const email = req.body.email.toLowerCase();
-        userModel.findOne({ email: email }, (error, user) => {
+        const password = req.body.password
+        userModel.findOne({ email: email }, async (error, user) => {
             if (!error) {
                 if (user) {
                     console.log("User already exist: ", user);
@@ -44,23 +51,20 @@ app.post('/signup', async (req, res) => {
                     });
                     return;
                 } else {
-                    if (password === confirmpassword) {
-                        userModel.create({
-                            firstName: req.body.firstName,
-                            lastName: req.body.lastName,
-                            age: req.body.age,
-                            email: req.body.email,
-                            gender: req.body.gender,
-                            phone: req.body.phone,
-                            password: req.body.password,
-                            confirmpassword: req.body.confirmpassword,
-                        })
-                        res.status(201).send(
-                            `user created`
-                        )
-                    } else {
-                        res.send("Passwords didn't Match")
-                    }
+                    const hashPassword = await bcrypt.hash(password, 10)
+                    // console.log(hashPassword)
+                    userModel.create({
+                        firstName: req.body.firstName,
+                        lastName: req.body.lastName,
+                        age: req.body.age,
+                        email: req.body.email,
+                        gender: req.body.gender,
+                        phone: req.body.phone,
+                        password: hashPassword,
+                    })
+                    res.status(201).send(
+                        `User Created`
+                    )
                 }
             }
         })
@@ -68,17 +72,38 @@ app.post('/signup', async (req, res) => {
         res.status(500).send(error)
     }
 })
-// ----------------------------------- Create User -----------------------------------
+// ----------------------------------- SignUp -----------------------------------
 
 
-
-
-
-
-
-
-
-
+// ----------------------------------- Login -----------------------------------
+app.post("/login", (req, res) => {
+    try {
+        const email = req.body.email.toLowerCase();
+        const password = req.body.password;
+        userModel.findOne({ email }, async (error, user) => {
+            if (!error) {
+                if (user) {
+                    const isValid = await bcrypt.compare(password, user.password)
+                    if (isValid) {
+                        const token = jwt.sign({ _id: user._id, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, SECRET)
+                        res.cookie("Cookie", token, { maxAge: 86_400_000, httpOnly: true })
+                        res.status(200).send('User Found')
+                    } else {
+                        res.status(401).send('Wrong Password')
+                    }
+                } else {
+                    res.status(404).send('User not Found')
+                }
+            } else {
+                res.status(401).send("Login Failed, Please try later");
+                return;
+            }
+        })
+    } catch (error) {
+        res.status(500).send(error)
+    }
+})
+// ----------------------------------- Login -----------------------------------
 
 
 ////////////////mongodb connected disconnected events///////////////////////////////////////////////
