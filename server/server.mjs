@@ -86,7 +86,7 @@ app.post("/login", (req, res) => {
                     const isValid = await bcrypt.compare(password, user.password)
                     if (isValid) {
                         const token = jwt.sign({ _id: user._id, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, SECRET)
-                        res.cookie("Cookie", token, { maxAge: 86_400_000, httpOnly: true })
+                        res.cookie("Token", token, { maxAge: 86_400_000, httpOnly: true })//secure:true for https request only
                         res.status(200).send('User Found')
                     } else {
                         res.status(401).send('Wrong Password')
@@ -104,6 +104,45 @@ app.post("/login", (req, res) => {
     }
 })
 // ----------------------------------- Login -----------------------------------
+
+
+// ----------------------------------- Middleware -----------------------------------
+app.use((req, res, next) => {
+    if (!req?.cookies?.Token) {
+        res.status(401).send({
+            message: "Include http-only credentials with every request"
+        })
+        return;
+    }
+    jwt.verify(req.cookies.Cookies, SECRET, (err, decodedData) => {
+        if (!err) {
+            console.log("decodedData: ", decodedData);
+            const currentTime = new Date().getTime() / 1000;
+            if (decodedData.exp < currentTime) {
+                res.status(401);
+                res.cookie('Token', '', {
+                    maxAge: 1,
+                    httpOnly: true
+                });
+                res.send({ message: "Token Expired" })
+            } else {
+                console.log("Token Approved");
+                req.body.Cookies = decodedData
+                next();
+            }
+        } else {
+            res.status(401).send("Invalid Token")
+        }
+    });
+})
+// ----------------------------------- Middleware -----------------------------------
+
+
+
+
+
+
+
 
 
 ////////////////mongodb connected disconnected events///////////////////////////////////////////////
