@@ -21,7 +21,7 @@ const Signup = () => {
                 console.log("User Added Succesfully 👍");
             })
             .catch(error => {
-                console.log('Error occured while adding product ❌', error)
+                console.log('Error occured while creating user ❌', error)
             })
 
     }
