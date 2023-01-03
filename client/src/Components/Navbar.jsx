@@ -6,7 +6,7 @@ import Login from './Login'
 import Signup from './Signup'
 
 const Navbar = () => {
-    const [isLogin, setisLogin] = useState(true)
+    const [isLogin, setisLogin] = useState(false)
     return (
         <>
             <Router>
