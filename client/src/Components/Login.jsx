@@ -1,10 +1,12 @@
-import { React, useState } from 'react'
+import { React, useState, useContext } from 'react'
 import axios from 'axios'
+import { GlobalContext } from '../Context/Context';
 
 let baseUrl = '';
 if (window.location.href.split(':')[0] === 'http') { baseUrl = 'http://localhost:5426' }
 
 const Login = () => {
+    let { state, dispatch } = useContext(GlobalContext);
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const loginHandler = async (e) => {
@@ -16,6 +18,7 @@ const Login = () => {
             }, {
                 withCredentials: true
             })
+            dispatch({ type: "LOGIN" })
             console.log("Login Successful")
         }
         catch (error) {
@@ -30,8 +33,6 @@ const Login = () => {
                 Password : <input type="password" name='password' onChange={(e) => { setPassword(e.target.value) }} /> <br />
                 <button type='submit'>Login</button>
             </form>
-            <h1>{email}</h1>
-            <h1>{password}</h1>
         </>
     )
 }

@@ -1,0 +1,23 @@
+nav {
+    background-color: #000;
+    height: 60px;
+    display: flex;
+    padding: 20px;
+}
+
+ul {
+    display: flex;
+    list-style: none;
+    margin-right: 20px;
+}
+
+li {
+    padding: 0 20px;
+    font-size: 20px;
+}
+
+a {
+    text-decoration: none;
+    color: white;
+    text-transform: uppercase;
+}
