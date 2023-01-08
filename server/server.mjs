@@ -24,16 +24,20 @@ app.use(cors({
 
 // ----------------------------------- MongoDB -----------------------------------
 let userSchema = new mongoose.Schema({
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    age: { type: String, required: true },
+    name: { type: String, required: true },
     email: { type: String, trim: true, lowercase: true, unique: true },
-    gender: { type: String, required: true },
     phone: { type: String, required: true },
     password: { type: String, required: true },
     createdOn: { type: Date, default: Date.now }
 })
 const userModel = mongoose.model('Users', userSchema);
+
+let productSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    price: Number,
+    createdOn: { type: Date, default: Date.now }
+})
+const productModel = mongoose.model('Products', productSchema);
 // ----------------------------------- MongoDB -----------------------------------
 
 
@@ -45,31 +49,30 @@ app.post('/signup', async (req, res) => {
         userModel.findOne({ email: email }, async (error, user) => {
             if (!error) {
                 if (user) {
-                    console.log("User already exist: ", user);
                     res.status(409).send({
                         message: "User already exists. Please try a different email"
                     });
+                    console.log("User already exist with the following email: ", user.email);
                     return;
                 } else {
                     const hashPassword = await bcrypt.hash(password, 10)
                     // console.log(hashPassword)
                     userModel.create({
-                        firstName: req.body.firstName,
-                        lastName: req.body.lastName,
-                        age: req.body.age,
+                        name: req.body.name,
                         email: req.body.email,
-                        gender: req.body.gender,
                         phone: req.body.phone,
                         password: hashPassword,
                     })
                     res.status(201).send(
                         `User Created`
                     )
+                    console.log("User Created.")
                 }
             }
         })
     } catch (error) {
         res.status(500).send(error)
+        console.log("Error While Creating User.")
     }
 })
 // ----------------------------------- SignUp -----------------------------------
@@ -88,19 +91,24 @@ app.post("/login", (req, res) => {
                         const token = jwt.sign({ _id: user._id, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, SECRET)
                         res.cookie("Token", token, { maxAge: 86_400_000, httpOnly: true })//secure:true for https request only
                         res.status(200).send('User Found')
+                        console.log("User Found.", user)
                     } else {
                         res.status(401).send('Wrong Password')
+                        console.log("Wrong Password.")
                     }
                 } else {
                     res.status(404).send('User not Found')
+                    console.log("User not Found.")
                 }
             } else {
                 res.status(401).send("Login Failed, Please try later");
+                console.log("Login Failed, Please try later");
                 return;
             }
         })
     } catch (error) {
         res.status(500).send(error)
+        console.log("No User Found with the following email: ", email)
     }
 })
 // ----------------------------------- Login -----------------------------------
@@ -112,6 +120,7 @@ app.use((req, res, next) => {
         res.status(401).send({
             message: "Include http-only credentials with every request"
         })
+        console.log("Include http-only credentials with every request")
         return;
     }
     jwt.verify(req.cookies.Cookies, SECRET, (err, decodedData) => {
@@ -136,6 +145,42 @@ app.use((req, res, next) => {
     });
 })
 // ----------------------------------- Middleware -----------------------------------
+
+
+
+// ----------------------------------- Create/Add Product -----------------------------------
+app.post('/product', (req, res) => {
+    const body = req.body
+    if (!body.name || !body.price) {
+        res.status(400).send({
+            message: `Required Paramters Missing`
+        })
+        return;
+    }
+    productModel.create({
+        name: body.name,
+        price: body.price,
+    },
+        (error, uploaded) => {
+            if (!error) {
+                console.log("Succesfully Uploaded to database", uploaded);
+                res.send({
+                    message: "Product Added Successfully",
+                    data: uploaded
+                });
+            } else {
+                res.status(500).send({
+                    message: "server error"
+                })
+            }
+        })
+})
+// ----------------------------------- Create/Add Product -----------------------------------
+
+
+
+
+
 
 
 

@@ -4,8 +4,9 @@ import { GlobalContext } from '../../Context/Context';
 import './Navbar.css'
 import Home from '../Home'
 import About from '../About'
-import Login from '../Login'
-import Signup from '../Signup'
+import Login from '../Auth/Login'
+import Signup from '../Auth/Signup'
+import Products from '../Products'
 
 const Navbar = () => {
 
@@ -18,6 +19,7 @@ const Navbar = () => {
                     <ul>
                         <li><Link to={`/`}>Home</Link></li>
                         <li><Link to={`/about`}>About</Link></li>
+                        <li><Link to={`/product`}>Product</Link></li>
                     </ul>
                 </nav>
                 :
@@ -32,6 +34,7 @@ const Navbar = () => {
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="about" element={<About />} />
+                    <Route path="product" element={<Products />} />
                     <Route path="*" element={<Navigate to="/" replace={true} />} />
                 </Routes>
                 :
