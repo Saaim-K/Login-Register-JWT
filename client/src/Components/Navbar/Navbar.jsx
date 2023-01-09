@@ -1,6 +1,7 @@
 import { React, useContext } from 'react'
 import { Link, Routes, Route, Navigate } from 'react-router-dom'
 import { GlobalContext } from '../../Context/Context';
+import axios from 'axios'
 import './Navbar.css'
 import Home from '../Home'
 import About from '../About'
@@ -8,9 +9,26 @@ import Login from '../Auth/Login'
 import Signup from '../Auth/Signup'
 import Products from '../Products'
 
+let baseUrl = '';
+if (window.location.href.split(':')[0] === 'http') { baseUrl = 'http://localhost:5426' }
+
 const Navbar = () => {
 
     let { state, dispatch } = useContext(GlobalContext);
+
+    const handleLogout = async () => {
+        try {
+            await axios.post(`${baseUrl}/logout`, {
+                withCredentials: true
+            })
+            dispatch({ type: "LOGOUT" })
+            console.log("Logout Successful")
+        }
+        catch (error) {
+            console.log("error: ", error);
+        }
+    }
+
 
     return (
         <>
@@ -20,6 +38,7 @@ const Navbar = () => {
                         <li><Link to={`/`}>Home</Link></li>
                         <li><Link to={`/about`}>About</Link></li>
                         <li><Link to={`/product`}>Product</Link></li>
+                        <li><button onClick={handleLogout}>Logout</button></li>
                     </ul>
                 </nav>
                 :

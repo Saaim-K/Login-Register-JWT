@@ -10,8 +10,6 @@ const Products = () => {
     const [price, setPrice] = useState('')
     const [addProduct, setAddProduct] = useState(false)//Runs every time product is added ,deleted or edited 
     const [product, setProduct] = useState([])
-    const [loading, setLoading] = useState(false);
-
 
     // ----------------------------- Create Product Function -----------------------------
     const createPost = (e) => {
@@ -58,7 +56,6 @@ const Products = () => {
     return (
         <>
 
-            {(loading) ? <div className='loader'><div className='pac-man' /></div> : ""}
             <form >
                 <h1>Product</h1>
                 <h3>
@@ -71,14 +68,16 @@ const Products = () => {
             </form>
 
             <div>
-                {product.map((eachProduct, i) => {
+                {product.map((eachProduct, i) =>
+                (
                     <div key={i}>
                         <hr />
                         <h2><b>Name</b> :{eachProduct.name}</h2>
                         <p><b>ID</b> :{eachProduct._id}</p>
                         <p><b>Price</b> :{eachProduct.price}</p>
                     </div>
-                })}
+                )
+                )}
             </div>
 
 

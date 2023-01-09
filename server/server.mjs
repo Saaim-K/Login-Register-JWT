@@ -113,6 +113,16 @@ app.post("/login", (req, res) => {
 })
 // ----------------------------------- Login -----------------------------------
 
+// ----------------------------------- Login -----------------------------------
+app.post("/logout", (req, res) => {
+    res.cookie('Token', '', { maxAge: 1, httpOnly: true });
+    res.status(200).send('Logged Out')
+    console.log("Logged Out.")
+})
+// ----------------------------------- Login -----------------------------------
+
+
+
 
 // ----------------------------------- Middleware -----------------------------------
 app.use((req, res, next) => {
@@ -129,10 +139,7 @@ app.use((req, res, next) => {
             const currentTime = new Date().getTime() / 1000;
             if (decodedData.exp < currentTime) {
                 res.status(401);
-                res.cookie('Token', '', {
-                    maxAge: 1,
-                    httpOnly: true
-                });
+                res.cookie('Token', '', { maxAge: 1, httpOnly: true });
                 res.send({ message: "Token Expired" })
             } else {
                 console.log("Token Approved");

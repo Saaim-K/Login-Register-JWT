@@ -48,6 +48,7 @@ form .email a {
     outline: 1px dashed transparent;
     outline-offset: 2px;
     display: inline;
+    padding-top: 10px;
 }
 
 form a:hover {
