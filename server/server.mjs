@@ -113,15 +113,14 @@ app.post("/login", (req, res) => {
 })
 // ----------------------------------- Login -----------------------------------
 
-// ----------------------------------- Login -----------------------------------
+
+// ----------------------------------- Logout -----------------------------------
 app.post("/logout", (req, res) => {
-    res.cookie('Token', '', { maxAge: 1, httpOnly: true });
+    res.cookie('Token', '', { maxAge: 1, httpOnly: true, sameSite: "none", secure: true });
     res.status(200).send('Logged Out')
     console.log("Logged Out.")
 })
-// ----------------------------------- Login -----------------------------------
-
-
+// ----------------------------------- Logout -----------------------------------
 
 
 // ----------------------------------- Middleware -----------------------------------
@@ -139,7 +138,7 @@ app.use((req, res, next) => {
             const currentTime = new Date().getTime() / 1000;
             if (decodedData.exp < currentTime) {
                 res.status(401);
-                res.cookie('Token', '', { maxAge: 1, httpOnly: true });
+                res.cookie('Token', '', { maxAge: 1, httpOnly: true, sameSite: "none", secure: true });
                 res.send({ message: "Token Expired" })
             } else {
                 console.log("Token Approved");
@@ -152,7 +151,6 @@ app.use((req, res, next) => {
     });
 })
 // ----------------------------------- Middleware -----------------------------------
-
 
 
 // ----------------------------------- Create/Add Product -----------------------------------
@@ -183,15 +181,6 @@ app.post('/product', (req, res) => {
         })
 })
 // ----------------------------------- Create/Add Product -----------------------------------
-
-
-
-
-
-
-
-
-
 
 
 
