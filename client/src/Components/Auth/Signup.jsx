@@ -54,7 +54,7 @@ const Signup = () => {
                             <span className="required">Password</span>
                         </label>
                     </div>
-                    <input type="submit" value="Log In" />
+                    <input type="submit" value="Sign In" />
                     <div className="email">
                         <Link to={`/login`}>Already have an account ?</Link>
                     </div>
