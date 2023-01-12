@@ -184,8 +184,6 @@ app.post('/product', (req, res) => {
 
 
 
-
-
 ////////////////mongodb connected disconnected events///////////////////////////////////////////////
 mongoose.connection.on('connected', function () {//connected
     console.log("Mongoose is connected");
